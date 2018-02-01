@@ -18,9 +18,17 @@ describe('TestSandbox integration tests', () => {
     '../../../test/fixtures',
     COPY_FILE,
   );
+  const TEST_FILE = 'test.js';
+  const TEST_FILE_RESOLVED = resolve(__dirname, '../fixtures', TEST_FILE);
+  const TEST_FILE_MAP = 'test.js.map';
+  const TEST_FILE_MAP_RESOLVED = resolve(
+    __dirname,
+    '../fixtures',
+    TEST_FILE_MAP,
+  );
+
   let fileContent: string;
 
-  before(getCopyFileContents);
   beforeEach(createSandbox);
   beforeEach(givenPath);
   afterEach(deleteSandbox);
@@ -39,7 +47,7 @@ describe('TestSandbox integration tests', () => {
   it('copies a file to the sandbox', async () => {
     await sandbox.copyFile(COPY_FILE_PATH);
     expect(await pathExists(resolve(path, COPY_FILE))).to.be.True();
-    await compareFiles(resolve(path, COPY_FILE));
+    await compareFiles(COPY_FILE_PATH, resolve(path, COPY_FILE));
   });
 
   it('copies and renames the file to the sandbox', async () => {
@@ -47,16 +55,51 @@ describe('TestSandbox integration tests', () => {
     await sandbox.copyFile(COPY_FILE_PATH, rename);
     expect(await pathExists(resolve(path, COPY_FILE))).to.be.False();
     expect(await pathExists(resolve(path, rename))).to.be.True();
-    await compareFiles(resolve(path, rename));
+    await compareFiles(COPY_FILE_PATH, resolve(path, rename));
   });
 
   it('copies file to a directory', async () => {
     const dir = 'test';
-    await sandbox.mkdir(dir);
     const rename = `${dir}/${COPY_FILE}`;
     await sandbox.copyFile(COPY_FILE_PATH, rename);
     expect(await pathExists(resolve(path, rename))).to.be.True();
-    await compareFiles(resolve(path, rename));
+    await compareFiles(COPY_FILE_PATH, resolve(path, rename));
+  });
+
+  it('copies source file and map to directory', async () => {
+    await sandbox.copySourceCodeFile(TEST_FILE_RESOLVED);
+    expect(await pathExists(resolve(path, TEST_FILE))).to.be.True();
+    expect(await pathExists(resolve(path, TEST_FILE_MAP))).to.be.True();
+    await compareFiles(TEST_FILE_RESOLVED, resolve(path, TEST_FILE));
+    await compareFiles(TEST_FILE_MAP_RESOLVED, resolve(path, TEST_FILE_MAP));
+  });
+
+  it('copies source file and map to sub-directory (without file name)', async () => {
+    const subdir = 'test';
+    await sandbox.copySourceCodeFile(TEST_FILE_RESOLVED, subdir);
+    expect(await pathExists(resolve(path, 'test/test.js'))).to.be.True();
+    expect(await pathExists(resolve(path, 'test/test.js.map'))).to.be.True();
+    await compareFiles(TEST_FILE_RESOLVED, resolve(path, 'test/test.js'));
+    await compareFiles(
+      TEST_FILE_MAP_RESOLVED,
+      resolve(path, 'test/test.js.map'),
+    );
+  });
+
+  it('copies source file (renamed) and map file (with new name)', async () => {
+    const rename = 'test.rename.js';
+    await sandbox.copySourceCodeFile(TEST_FILE_RESOLVED, rename);
+    expect(await pathExists(resolve(path, rename))).to.be.True();
+    expect(await pathExists(resolve(path, rename + '.map'))).to.be.True();
+    await compareFiles(TEST_FILE_RESOLVED, resolve(path, rename));
+    await compareFiles(TEST_FILE_MAP_RESOLVED, resolve(path, rename + '.map'));
+  });
+
+  it('ignores the map file if copyMap is set to false', async () => {
+    await sandbox.copySourceCodeFile(TEST_FILE_RESOLVED, TEST_FILE, false);
+    expect(await pathExists(resolve(path, TEST_FILE))).to.be.True();
+    expect(await pathExists(resolve(path, TEST_FILE_MAP))).to.be.False();
+    await compareFiles(TEST_FILE_RESOLVED, resolve(path, TEST_FILE));
   });
 
   it('deletes the test sandbox', async () => {
@@ -95,13 +138,14 @@ describe('TestSandbox integration tests', () => {
     await sandbox.delete();
   }
 
-  async function compareFiles(path1: string) {
-    const file = await readFile(path1, 'utf8');
-    expect(file).to.equal(fileContent);
+  async function compareFiles(original: string, copied: string) {
+    const originalContent = await readFile(original, 'utf8');
+    const copiedContent = await readFile(copied, 'utf8');
+    expect(copiedContent).to.equal(originalContent);
   }
 
   function createSandbox() {
-    sandbox = new TestSandbox(resolve(__dirname, 'sandbox'));
+    sandbox = new TestSandbox(resolve(__dirname, '../../.sandbox'));
   }
 
   function givenPath() {
@@ -111,9 +155,5 @@ describe('TestSandbox integration tests', () => {
   async function deleteSandbox() {
     if (!await pathExists(path)) return;
     await remove(sandbox.getPath());
-  }
-
-  async function getCopyFileContents() {
-    fileContent = await readFile(COPY_FILE_PATH, 'utf8');
   }
 });

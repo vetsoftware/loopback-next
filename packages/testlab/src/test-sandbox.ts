@@ -7,7 +7,14 @@ import {tmpdir} from 'os';
 import {createHash} from 'crypto';
 import {resolve, join, parse} from 'path';
 import * as util from 'util';
-import {copy, ensureDirSync, emptyDir, remove, ensureDir} from 'fs-extra';
+import {
+  copy,
+  ensureDirSync,
+  emptyDir,
+  remove,
+  ensureDir,
+  pathExists,
+} from 'fs-extra';
 
 /**
  * TestSandbox class provides a convenient way to get a reference to a
@@ -86,5 +93,37 @@ export class TestSandbox {
       ? resolve(this.path, dest)
       : resolve(this.path, parse(src).base);
     await copy(src, dest);
+  }
+
+  /**
+   * Copies a file from src to the TestSandbox. `.js.map` files are also copied
+   * to the sandbox by default.
+   * @param src Absolute path of file to be copied to the TestSandbox
+   * @param [dest] Optional. Destination path / filename of the copy operation
+   * (relative to TestSandbox). Original filename used if not specified or path
+   * given.
+   * @param copyMap Copy `.js.map` to TestSandbox or not. Defaults to true.
+   */
+  async copySourceCodeFile(
+    src: string,
+    dest?: string,
+    copyMap: boolean = true,
+  ): Promise<void> {
+    this.validateInst();
+    dest = dest
+      ? parse(dest).ext.length > 0
+        ? resolve(this.path, dest)
+        : resolve(this.path, dest, parse(src).base)
+      : resolve(this.path, parse(src).base);
+
+    await copy(src, dest);
+
+    if (copyMap && parse(src).ext === '.js') {
+      const srcMap = src + '.map';
+      if (await pathExists(srcMap)) {
+        const destMap = dest + '.map';
+        await copy(srcMap, destMap);
+      }
+    }
   }
 }
