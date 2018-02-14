@@ -13,6 +13,7 @@ import {
   Constructor,
   instantiateClass,
   invokeMethod,
+  BindingScope,
 } from '@loopback/context';
 import {ServerRequest} from 'http';
 import * as HttpErrors from 'http-errors';
@@ -261,6 +262,7 @@ export class Route extends BaseRoute {
 type ControllerInstance = {[opName: string]: Function};
 
 export class ControllerRoute extends BaseRoute {
+  protected readonly _controllerBindingKey: string;
   protected readonly _methodName: string;
 
   constructor(
@@ -298,6 +300,7 @@ export class ControllerRoute extends BaseRoute {
     }
 
     this._methodName = methodName;
+    this._controllerBindingKey = `controllers.${this._controllerCtor.name}`;
   }
 
   describe(): string {
@@ -306,6 +309,13 @@ export class ControllerRoute extends BaseRoute {
 
   updateBindings(requestContext: Context) {
     const ctor = this._controllerCtor;
+    if (!requestContext.contains(this._controllerBindingKey)) {
+      console.log(`binding ${this._controllerBindingKey}`);
+      requestContext
+        .bind(this._controllerBindingKey)
+        .toClass(ctor)
+        .inScope(BindingScope.SINGLETON);
+    }
     requestContext.bind('controller.current.ctor').to(ctor);
     requestContext.bind('controller.current.operation').to(this._methodName);
   }
@@ -329,14 +339,10 @@ export class ControllerRoute extends BaseRoute {
     );
   }
 
-  private async _createControllerInstance(
+  private _createControllerInstance(
     requestContext: Context,
   ): Promise<ControllerInstance> {
-    const valueOrPromise = instantiateClass(
-      this._controllerCtor,
-      requestContext,
-    );
-    return (await Promise.resolve(valueOrPromise)) as ControllerInstance;
+    return requestContext.get(this._controllerBindingKey);
   }
 }
 
