@@ -55,8 +55,8 @@ export class RestApplication extends Application implements HttpServerLike {
    * @param req The request.
    * @param res The response.
    */
-  get requestHandler(): HttpRequestListener {
-    return this.restServer.requestHandler;
+  get requestListener(): HttpRequestListener {
+    return this.restServer.requestListener;
   }
 
   constructor(config?: ApplicationConfig) {

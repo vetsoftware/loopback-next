@@ -4,8 +4,6 @@
 // License text available at https://opensource.org/licenses/MIT
 
 import {
-  ServerRequest,
-  ServerResponse,
   Route,
   RestBindings,
   RestServer,
@@ -13,6 +11,8 @@ import {
   RestApplication,
   SequenceActions,
   HttpServerLike,
+  Request,
+  Response,
 } from '../../..';
 
 import {api, get, post, param, requestBody} from '@loopback/openapi-v3';
@@ -25,7 +25,7 @@ import {
   ResponseObject,
 } from '@loopback/openapi-v3-types';
 
-import {expect, Client, createClientForHandler} from '@loopback/testlab';
+import {expect, createClientForHandler, Client} from '@loopback/testlab';
 import {anOpenApiSpec, anOperationSpec} from '@loopback/openapi-spec-builder';
 import {inject, Context} from '@loopback/context';
 import {ControllerClass} from '../../../src/router/routing-table';
@@ -308,12 +308,12 @@ describe('Routing', () => {
     @api(spec)
     class StatusController {
       constructor(
-        @inject(RestBindings.Http.REQUEST) private request: ServerRequest,
-        @inject(RestBindings.Http.RESPONSE) private response: ServerResponse,
+        @inject(RestBindings.Http.REQUEST) private request: Request,
+        @inject(RestBindings.Http.RESPONSE) private response: Response,
       ) {}
 
       async getStatus(): Promise<string> {
-        this.response.statusCode = 202; // 202 Accepted
+        this.response.status(202); // 202 Accepted
         return this.request.method as string;
       }
     }
@@ -608,9 +608,9 @@ describe('Routing', () => {
 
     it('provides httpHandler compatible with HTTP server API', async () => {
       const app = new RestApplication();
-      app.handler((sequence, req, res) => res.end('hello'));
+      app.handler((sequence, httpCtx) => httpCtx.res.end('hello'));
 
-      await createClientForHandler(app.requestHandler)
+      await createClientForHandler(app.requestListener)
         .get('/')
         .expect(200, 'hello');
     });
@@ -642,6 +642,6 @@ describe('Routing', () => {
   }
 
   function whenIMakeRequestTo(serverOrApp: HttpServerLike): Client {
-    return createClientForHandler(serverOrApp.requestHandler);
+    return createClientForHandler(serverOrApp.requestListener);
   }
 });
