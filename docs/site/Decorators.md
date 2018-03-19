@@ -167,12 +167,12 @@ accordingly or do a composition of them:
   }
   ```
 
-  Writing the whole parameter specification is tedious, we've created shortcuts to define
+  Writing the whole parameter specification is tedious, so we've created shortcuts to define
   the params with the pattern `@param.${in}.${type}(${name})`:
 
-  - in: the parameter location, it can be one of the following values: `query`, `header`, `path`.
-  - type: a [common name of OpenAPI primitive data type](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#data-types). 
-  - name: name of the parameter, it should be a `string`.
+  - in: The parameter location. It can be one of the following values: `query`, `header`, `path`.
+  - type: A [common name of OpenAPI primitive data type](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#data-types). 
+  - name: Name of the parameter. It should be a `string`.
 
   Take specifying a data from query as an example, a list of available shortcuts for can
   be found in [API document](http://apidocs.loopback.io/@loopback%2fopenapi-v3/#param.query). 
@@ -189,7 +189,7 @@ accordingly or do a composition of them:
     }
   ```
 
-  You can find the specific usage in [Writing Controller methods](controllers.md#writing-controller-methods)
+  You can find specific use cases in [Writing Controller methods](controllers.md#writing-controller-methods)
 
   *The parameter location cookie is not supported yet, see*
   *https://github.com/strongloop/loopback-next/issues/997*
@@ -202,7 +202,8 @@ accordingly or do a composition of them:
   
   *Only one parameter can be decorated by `@requestBody` per controller method.*
 
-  A typical OpenAPI requestBody spec contains properties `description`, `required`, and `content`:
+  A typical [OpenAPI requestBody specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#requestBodyObject)
+  contains properties `description`, `required`, and `content`:
 
   ```ts
     requestBodySpec: {
@@ -215,7 +216,7 @@ accordingly or do a composition of them:
   }
   ```
 
-  When the decorated argument is a custom type or a model, we recommend you define 
+  If the decorated argument is a custom type or a model, we recommend you define 
   a model class with `@model` and `@property`:
   
   ```ts
@@ -251,13 +252,13 @@ accordingly or do a composition of them:
   }
   ```
 
-  For the simplest use case, you can leave the input of `@requestBody` empty, 
+  For the simplest use case, you can leave the input of `@requestBody` empty
   since we automatically detect the type of `user`, and generate the corresponding schema for it. 
   The default content type is set to be `application/json`.
 
   You can also customize the generated `requestBody` specification in 3 ways:
 
-  * add fields `description` and `required`
+  * add optional fields `description` and `required`
 
   ```ts
   class MyController {
@@ -282,7 +283,8 @@ accordingly or do a composition of them:
       @requestBody({
         content: {
           // leave the schema as empty object, the decorator will generate it.
-          'application/text': {}
+          'application/text': {},
+          'application/xml': {},
         } 
       }) user: User
     ) {}
