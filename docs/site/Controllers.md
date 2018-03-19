@@ -21,15 +21,15 @@ only on processed input and abstractions of backend services / databases.
 
 Simplest possible example of a Controller
 
-* app.controller()
+* `app.controller()`
 * a few methods
-* no usage of @api
+* no usage of `@api`
 
 How to create a basic `Controller` (beyond the hello world)
 
-* Using DI (@inject)
-* Using annotations (eg. @authenticate)
-* Defining routes via sugar annoations (@get, @post, @all)
+* Using DI (`@inject`)
+* Using annotations (eg. `@authenticate`)
+* Defining routes via sugar annoations (`@get`, `@post`)
 * Errors
 * Using `async` / `await` and `Promise`s
 
@@ -40,13 +40,13 @@ plain JavaScript function. The example below shows this as a Controller method.
 
 ```js
 // plain function Operation
-function greet(name) {
+function greet(name: string) {
   return `hello ${name}`;
 }
 
 // Controller method Operation
 class MyController {
-  greet(name) {
+  greet(name: string) {
     return `hello ${name}`;
   }
 }
@@ -55,7 +55,7 @@ class MyController {
 ## Routing to Controllers
 
 This is a basic API Specification used in the following examples. It is an
-[Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/0e51e2a1b2d668f434e44e5818a0cdad1be090b4/versions/2.0.md#operation-object).
+[Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#operationObject).
 
 ```js
 const spec = {
@@ -73,19 +73,25 @@ There are several ways to define `Routes` to Controller methods. The first
 example defines a route to the Controller without any magic.
 
 ```js
-app.route('get', '/greet', spec, MyController, 'greet');
+// ... in your application constructor
+this.route('get', '/greet', spec, MyController, 'greet');
 ```
 
 Decorators allow you to annotate your Controller methods with routing metadata,
 so LoopBack can call the `app.route()` function for you.
 
 ```js
+import {get} from '@loopback/rest';
+
 class MyController {
   @get('/greet', spec)
-  greet(name) {}
+  greet(name: string) {
+    return `hello ${name}`;
+  }
 }
 
-app.controller(MyController);
+// ... in your application constructor
+this.controller(MyController);
 ```
 
 ## Specifying Controller APIs
@@ -93,13 +99,19 @@ app.controller(MyController);
 For larger LoopBack applications, you can organize your routes into API
 Specifications using the OpenAPI specification. The `@api` decorator takes a
 spec with type `ControllerSpec` which comprises of a string `basePath` and a
-[Paths Object](https://github.com/OAI/OpenAPI-Specification/blob/0e51e2a1b2d668f434e44e5818a0cdad1be090b4/versions/2.0.md#paths-object).
-It is _not_ a full
-[Swagger](https://github.com/OAI/OpenAPI-Specification/blob/0e51e2a1b2d668f434e44e5818a0cdad1be090b4/versions/2.0.md#swagger-object)
+[Paths Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#paths-object)
+Note that it is _not_ a full
+[OpenAPI](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#oasObject)
 specification.
 
 ```js
-app.api({
+// ... in your application constructor
+this.api({
+  openapi: '',
+  info: {
+    title: 'Hello World App',
+    version: '3.0.0',
+  },
   basePath: '/',
   paths: {
     '/greet': {
@@ -117,7 +129,7 @@ app.api({
     },
   },
 });
-app.controller(MyController);
+this.controller(MyController);
 ```
 
 The `@api` decorator allows you to annotate your Controller with a
@@ -143,7 +155,9 @@ specification, so LoopBack can call the `app.api()` function for you.
   },
 })
 class MyController {
-  greet(name) {}
+  greet(name: string) {
+    return `hello ${name}`;
+  }
 }
 app.controller(MyController);
 ```
@@ -154,16 +168,19 @@ Below is an example Controller that uses several built in helpers (decorators).
 These helpers give LoopBack hints about the Controller methods.
 
 ```js
-import 'HelloRepostory' from 'path.to.repository';
-import 'HelloMessage' from 'path.to.type';
+import {HelloRepository} from '../repositories';
+import {HelloMessage} from '../models';
+import {get, param} from '@loopback/rest';
+import {repository} from '@loopback/repository';
 
-class HelloController {
-  constructor() {
-    this.repository = new HelloRepository(); // our repository
-  }
+export class HelloController {
+  constructor(
+    @repository(HelloRepository.name) protected repository: HelloRepository,
+  ) {}
+
+  // returns a list of our objects
   @get('/messages')
-  @param.query.number('limit')
-  async list(limit = 10): Promise<HelloMessage[]> { // returns a list of our objects
+  async list(@param.query.number('limit') limit = 10): Promise<HelloMessage[]> {
     if (limit > 100) limit = 100; // your logic
     return await this.repository.find({limit}); // a CRUD method from our repository
   }
@@ -173,8 +190,11 @@ class HelloController {
 * `HelloRepository` extends from `Repository`, which is LoopBack's database
   abstraction. See [Repositories](./Repositories.md) for more.
 * `HelloMessage` is the arbitrary object that `list` returns a list of.
-* `@get('/messages')` creates the `Route` for the Operation using `app.route()`.
-* `@param.query.number` adds a `number` param with a source of `query`.
+* `@get('/messages')` automatically creates the
+  [Paths Item Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#path-item-object)
+  for OpenAPI spec, which also handles request routing.
+* `@param.query.number` specifies in the spec being generated that the route
+  takes a parameter via query which will be a number.
 
 ## Handling Errors in Controllers
 
@@ -203,45 +223,50 @@ with a test to verify that the error is thrown properly.
 
 ```js
 // the test
-import {HelloController} from 'path.to.controller';
-import {HttpErrors, expect} from '@loopback/testlab';
+import {HelloController} from '../../../src/controllers';
+import {HelloRepository} from '../../../src/repositories';
+import {testdb} from '../../fixtures/datasources/testdb.datasource';
+import {expect} from '@loopback/testlab';
+import {HttpErrors} from '@loopback/rest';
+
+const HttpError = HttpErrors.HttpError;
 
 describe('Hello Controller', () => {
-  it('returns 422 Unprocessable Entity for non-positive limit', async () => {
-    const controller = new HelloController();
-    let errCaught: Error;
-    try {
-      await controller.list(0.4); // an HttpError should be thrown here
-    } catch (err) {
-      errCaught = err;
-    }
-    // the test fails here if the error was not thrown
-    expect(errCaught).to.have.property('statusCode', 422);
-    expect(errCaught.message).to.match(/non-positive/i);
+  it('returns 422 Unprocessable Entity for non-positive limit', () => {
+    const repo = new HelloRepository(testdb);
+    const controller = new HelloController(repo);
+
+    return expect(controller.list(0.4)).to.be.rejectedWith(HttpError, {
+      message: 'limit is non-positive',
+      statusCode: 422,
+    });
   });
 });
+
 ```
 
 ```js
 // the controller
-import 'HttpErrors' from '@loopback/rest';
-import 'HelloRepostory' from 'path.to.repository';
-import 'HelloMessage' from 'path.to.type';
+import {HelloRepository} from '../repositories';
+import {HelloMessage} from '../models';
+import {get, param, HttpErrors} from '@loopback/rest';
+import {repository} from '@loopback/repository';
 
-class HelloController {
-  repository: HelloRepository; // see Dependency Injection for a better practice
-  constructor() {
-    this.repository = new HelloRepository();
-  }
+export class HelloController {
+  constructor(
+    @repository(HelloRepository.name) protected repo: HelloRepository,
+  ) {}
+
+  // returns a list of our objects
   @get('/messages')
-  @param.query.number('limit')
-  async list(limit = 10): Promise<HelloMessage[]>{
+  async list(@param.query.number('limit') limit = 10): Promise<HelloMessage[]> {
     // throw an error when the parameter is not a non-positive integer
-    if (!Number.isInteger(limit) || limit < 1)
-      throw new HttpErrors.UnprocessableEntity('limit is non-positive'));
-    else if (limit > 100)
+    if (!Number.isInteger(limit) || limit < 1) {
+      throw new HttpErrors.UnprocessableEntity('limit is non-positive');
+    } else if (limit > 100) {
       limit = 100;
-    return await this.repository.find({limit});
+    }
+    return await this.repo.find({limit});
   }
 }
 ```
