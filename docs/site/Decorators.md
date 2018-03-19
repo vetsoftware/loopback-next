@@ -133,11 +133,11 @@ accordingly or do a composition of them:
 
 ### Parameter Decorator
  
-  Syntax: see [API document](https://github.com/strongloop/loopback-next/blob/master/packages/openapi-v3/src/parameter-decorator.ts#L18-L29)
+  Syntax: see [API documentation](https://github.com/strongloop/loopback-next/blob/master/packages/openapi-v3/src/parameter-decorator.ts#L18-L29)
 
   Shortcut Pattern: `@param.${in}.${type}(${name})`
 
-  `@param` is applied to method parameters to generate OpenAPI parameter specification for it.
+  `@param` is applied to controller method parameters to generate OpenAPI parameter specification for them.
 
   For example:
 
@@ -167,15 +167,17 @@ accordingly or do a composition of them:
   }
   ```
 
-  Writing the whole parameter specification is tedious, we create shortcuts to define params with pattern `@param.${in}.${type}(${name})`:
+  Writing the whole parameter specification is tedious, we've created shortcuts to define
+  the params with the pattern `@param.${in}.${type}(${name})`:
 
-  - in: the parameter location, one of the following values: `query`, `header`, `path`.
-  - type: a [common name of OpenAPI primitive data type](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#data-types), 
-    take specifying a data get from query as an example, a list of available shortcuts can
-    be found in [API document](http://apidocs.loopback.io/@loopback%2fopenapi-v3/#param.query).
-  - name: name of the parameter, should be a `string`, 
+  - in: the parameter location, it can be one of the following values: `query`, `header`, `path`.
+  - type: a [common name of OpenAPI primitive data type](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#data-types). 
+  - name: name of the parameter, it should be a `string`.
 
-  An equivalent example using shortcut decorator would be:
+  Take specifying a data from query as an example, a list of available shortcuts for can
+  be found in [API document](http://apidocs.loopback.io/@loopback%2fopenapi-v3/#param.query). 
+
+  An equivalent example using the shortcut decorator would be:
   
   ```ts
     class MyController {
@@ -187,20 +189,20 @@ accordingly or do a composition of them:
     }
   ```
 
-  You can find the specific usage in [Writing Controller methods](controller.htm#writing-controller-methods)
+  You can find the specific usage in [Writing Controller methods](controllers.md#writing-controller-methods)
 
-  *We are supporting parameter location 'cookie' in the feature, track the feature in story*
+  *The parameter location cookie is not supported yet, see*
   *https://github.com/strongloop/loopback-next/issues/997*
 
 ### RequestBody Decorator
 
-  Syntax: see [API document](https://github.com/strongloop/loopback-next/blob/master/packages/openapi-v3/src/request-body-decorator.ts#L20-L79)
+  Syntax: see [API documentation](https://github.com/strongloop/loopback-next/blob/master/packages/openapi-v3/src/request-body-decorator.ts#L20-L79)
 
-  `@requestBody()` is applied to a method parameter to generate OpenAPI requestBody specification for it.
+  `@requestBody()` is applied to a controller method parameter to generate OpenAPI requestBody specification for it.
   
   *Only one parameter can be decorated by `@requestBody` per controller method.*
 
-  A typical OpenAPI requestBody spec contains property `description`, `required`, and `content`:
+  A typical OpenAPI requestBody spec contains properties `description`, `required`, and `content`:
 
   ```ts
     requestBodySpec: {
@@ -213,12 +215,12 @@ accordingly or do a composition of them:
   }
   ```
 
-  When the type of decorated argument can be described as a schema, you can define 
-  it as a model class with `@model` and `@property`:
+  When the decorated argument is a custom type or a model, we recommend you define 
+  a model class with `@model` and `@property`:
   
   ```ts
   import {model, property} from '@loopback/repository';
-  import {Address} from './address';
+  import {Address} from './address.model';
 
   @model()
   class User {
@@ -230,8 +232,8 @@ accordingly or do a composition of them:
     address: Address
   }
   ```
-  *About decorating models and the corresponding OpenAPI schema, please check*
-  *[model decorators](#model-decorators)*
+  *To learn more about decorating models and the corresponding OpenAPI schema, please check*
+  *[model decorators](#model-decorators).*
 
   Then a typical usage of `@requestBody` is specifying a parameter's type as the model class,
   and applying the decorator on it:
@@ -240,7 +242,7 @@ accordingly or do a composition of them:
   import {User} from '../models/user'
   import {put} from '@loopback/rest'
   // in file controller.ts
-  class MyController {
+  class UserController {
     @put('/Users/{id}')
     async replaceUser(
       @param.path.string('id') id: string,
@@ -249,9 +251,9 @@ accordingly or do a composition of them:
   }
   ```
 
-  For the simplest use case, you can leave the input of `@requestBody` empty, we automatically
-  detect the type of `user`, generate the corresponding schema for it. 
-  And the default content type is set to be `application/json`.
+  For the simplest use case, you can leave the input of `@requestBody` empty, 
+  since we automatically detect the type of `user`, and generate the corresponding schema for it. 
+  The default content type is set to be `application/json`.
 
   You can also customize the generated `requestBody` specification in 3 ways:
 
@@ -305,7 +307,7 @@ accordingly or do a composition of them:
   }
   ```
 
-  *We are supporting more `@requestBody` shorts in the future, track the feature in story*
+  *We are supporting more `@requestBody` shortcuts in the future, track the feature in story*
   *https://github.com/strongloop/loopback-next/issues/1064*
 
 ## Dependency Injection
