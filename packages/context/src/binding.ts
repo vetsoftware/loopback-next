@@ -11,6 +11,7 @@ import {
   isPromiseLike,
   BoundValue,
   ValueOrPromise,
+  resolveValueOrPromise,
 } from './value-promise';
 import {Provider} from './provider';
 
@@ -193,21 +194,7 @@ export class Binding {
   ): ValueOrPromise<BoundValue> {
     // Initialize the cache as a weakmap keyed by context
     if (!this._cache) this._cache = new WeakMap<Context, BoundValue>();
-    if (isPromiseLike(result)) {
-      if (this.scope === BindingScope.SINGLETON) {
-        // Cache the value at owning context level
-        result = result.then(val => {
-          this._cache.set(ctx.getOwnerContext(this.key)!, val);
-          return val;
-        });
-      } else if (this.scope === BindingScope.CONTEXT) {
-        // Cache the value at the current context
-        result = result.then(val => {
-          this._cache.set(ctx, val);
-          return val;
-        });
-      }
-    } else {
+    return resolveValueOrPromise(result, val => {
       if (this.scope === BindingScope.SINGLETON) {
         // Cache the value
         this._cache.set(ctx.getOwnerContext(this.key)!, result);
@@ -215,8 +202,8 @@ export class Binding {
         // Cache the value at the current context
         this._cache.set(ctx, result);
       }
-    }
-    return result;
+      return val;
+    });
   }
 
   /**
@@ -233,7 +220,7 @@ export class Binding {
    *
    * ```
    * const result = binding.getValue(ctx);
-   * if (isPromise(result)) {
+   * if (isPromiseLike(result)) {
    *   result.then(doSomething)
    * } else {
    *   doSomething(result);
@@ -408,11 +395,7 @@ export class Binding {
         ctx!,
         session,
       );
-      if (isPromiseLike(providerOrPromise)) {
-        return providerOrPromise.then(p => p.value());
-      } else {
-        return providerOrPromise.value();
-      }
+      return resolveValueOrPromise(providerOrPromise, p => p.value());
     };
     return this;
   }
