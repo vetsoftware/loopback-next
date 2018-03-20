@@ -35,10 +35,11 @@ How to create a basic `Controller` (beyond the hello world)
 
 ## Operations
 
-In the previous Operation example, the `greet()` operation was defined as a
-plain JavaScript function. The example below shows this as a Controller method.
+In the Operation example in [Routes](Routes.md), the `greet()` operation was
+defined as a plain JavaScript function. The example below shows this as a
+Controller method in TypeScript.
 
-```js
+```ts
 // plain function Operation
 function greet(name: string) {
   return `hello ${name}`;
@@ -57,7 +58,7 @@ class MyController {
 This is a basic API Specification used in the following examples. It is an
 [Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#operationObject).
 
-```js
+```ts
 const spec = {
   parameters: [{name: 'name', type: 'string', in: 'query'}],
   responses: {
@@ -72,7 +73,7 @@ const spec = {
 There are several ways to define `Routes` to Controller methods. The first
 example defines a route to the Controller without any magic.
 
-```js
+```ts
 // ... in your application constructor
 this.route('get', '/greet', spec, MyController, 'greet');
 ```
@@ -80,7 +81,7 @@ this.route('get', '/greet', spec, MyController, 'greet');
 Decorators allow you to annotate your Controller methods with routing metadata,
 so LoopBack can call the `app.route()` function for you.
 
-```js
+```ts
 import {get} from '@loopback/rest';
 
 class MyController {
@@ -104,7 +105,7 @@ Note that it is _not_ a full
 [OpenAPI](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#oasObject)
 specification.
 
-```js
+```ts
 // ... in your application constructor
 this.api({
   openapi: '',
@@ -135,7 +136,7 @@ this.controller(MyController);
 The `@api` decorator allows you to annotate your Controller with a
 specification, so LoopBack can call the `app.api()` function for you.
 
-```js
+```ts
 @api({
   basePath: '/',
   paths: {
@@ -167,7 +168,7 @@ app.controller(MyController);
 Below is an example Controller that uses several built in helpers (decorators).
 These helpers give LoopBack hints about the Controller methods.
 
-```js
+```ts
 import {HelloRepository} from '../repositories';
 import {HelloMessage} from '../models';
 import {get, param} from '@loopback/rest';
@@ -221,8 +222,8 @@ codes is found
 The example below shows the previous controller revamped with `HttpErrors` along
 with a test to verify that the error is thrown properly.
 
-```js
-// the test
+```ts
+// test/integration/controllers/hello.controller.test.ts
 import {HelloController} from '../../../src/controllers';
 import {HelloRepository} from '../../../src/repositories';
 import {testdb} from '../../fixtures/datasources/testdb.datasource';
@@ -245,8 +246,8 @@ describe('Hello Controller', () => {
 
 ```
 
-```js
-// the controller
+```ts
+// src/controllers/hello.controller.ts
 import {HelloRepository} from '../repositories';
 import {HelloMessage} from '../models';
 import {get, param, HttpErrors} from '@loopback/rest';
