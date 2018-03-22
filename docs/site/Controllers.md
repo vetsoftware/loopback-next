@@ -21,17 +21,17 @@ only on processed input and abstractions of backend services / databases.
 
 Simplest possible example of a Controller
 
-* `app.controller()`
-* a few methods
-* no usage of `@api`
+- `app.controller()`
+- a few methods
+- no usage of `@api`
 
 How to create a basic `Controller` (beyond the hello world)
 
-* Using DI (`@inject`)
-* Using annotations (eg. `@authenticate`)
-* Defining routes via sugar annoations (`@get`, `@post`)
-* Errors
-* Using `async` / `await` and `Promise`s
+- Using DI (`@inject`)
+- Using annotations (eg. `@authenticate`)
+- Defining routes via sugar annoations (`@get`, `@post`)
+- Errors
+- Using `async` / `await` and `Promise`s
 
 ## Operations
 
@@ -101,7 +101,7 @@ For larger LoopBack applications, you can organize your routes into API
 Specifications using the OpenAPI specification. The `@api` decorator takes a
 spec with type `ControllerSpec` which comprises of a string `basePath` and a
 [Paths Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#paths-object)
-Note that it is _not_ a full
+Note that it is _not_ the full
 [OpenAPI](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#oasObject)
 specification.
 
@@ -188,13 +188,13 @@ export class HelloController {
 }
 ```
 
-* `HelloRepository` extends from `Repository`, which is LoopBack's database
+- `HelloRepository` extends from `Repository`, which is LoopBack's database
   abstraction. See [Repositories](./Repositories.md) for more.
-* `HelloMessage` is the arbitrary object that `list` returns a list of.
-* `@get('/messages')` automatically creates the
+- `HelloMessage` is the arbitrary object that `list` returns a list of.
+- `@get('/messages')` automatically creates the
   [Paths Item Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#path-item-object)
   for OpenAPI spec, which also handles request routing.
-* `@param.query.number` specifies in the spec being generated that the route
+- `@param.query.number` specifies in the spec being generated that the route
   takes a parameter via query which will be a number.
 
 ## Handling Errors in Controllers
