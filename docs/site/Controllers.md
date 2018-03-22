@@ -11,9 +11,13 @@ summary:
 ## Overview
 
 A `Controller` is a class that implements operations defined by application's
-REST API. It implements an application's business logic and acts as a bridge
-between the HTTP/REST API and domain/database models. A `Controller` operates
-only on processed input and abstractions of backend services / databases.
+API. It implements an application's business logic and acts as a bridge
+between the HTTP/REST API and domain/database models. Decorations are added to a
+`Controller` class and its members to map the API operations of the application
+to the corresponding controller's operations. A `Controller` operates only on
+processed input and abstractions of backend services / databases.
+
+This page will only cover `Controller`'s usage with REST APIs.
 
 ### Review questions
 
@@ -28,7 +32,7 @@ Simplest possible example of a Controller
 How to create a basic `Controller` (beyond the hello world)
 
 - Using DI (`@inject`)
-- Using annotations (eg. `@authenticate`)
+- Using decorators (eg. `@authenticate`)
 - Defining routes via sugar annoations (`@get`, `@post`)
 - Errors
 - Using `async` / `await` and `Promise`s
