@@ -96,9 +96,8 @@ export enum BindingType {
   PROVIDER = 'Provider',
 }
 
-// FIXME(bajtos) The binding class should be parameterized by the value
-// type stored
-export class Binding {
+// tslint:disable-next-line:no-any no-shadowed-variable
+export class Binding<BoundValue = any> {
   static PROPERTY_SEPARATOR = '#';
 
   /**
@@ -239,11 +238,11 @@ export class Binding {
       if (this.scope === BindingScope.SINGLETON) {
         const ownerCtx = ctx.getOwnerContext(this.key);
         if (ownerCtx && this._cache.has(ownerCtx)) {
-          return this._cache.get(ownerCtx);
+          return this._cache.get(ownerCtx)!;
         }
       } else if (this.scope === BindingScope.CONTEXT) {
         if (this._cache.has(ctx)) {
-          return this._cache.get(ctx);
+          return this._cache.get(ctx)!;
         }
       }
     }
@@ -368,14 +367,14 @@ export class Binding {
    *
    * @param provider The value provider to use.
    */
-  public toProvider<T>(providerClass: Constructor<Provider<T>>): this {
+  public toProvider(providerClass: Constructor<Provider<BoundValue>>): this {
     /* istanbul ignore if */
     if (debug.enabled) {
       debug('Bind %s to provider %s', this.key, providerClass.name);
     }
     this.type = BindingType.PROVIDER;
     this._getValue = (ctx, session) => {
-      const providerOrPromise = instantiateClass<Provider<T>>(
+      const providerOrPromise = instantiateClass<Provider<BoundValue>>(
         providerClass,
         ctx!,
         session,
@@ -396,7 +395,7 @@ export class Binding {
    *   arguments must be annotated with `@inject` so that
    *   we can resolve them from the context.
    */
-  toClass<T>(ctor: Constructor<T>): this {
+  toClass(ctor: Constructor<BoundValue>): this {
     /* istanbul ignore if */
     if (debug.enabled) {
       debug('Bind %s to class %s', this.key, ctor.name);

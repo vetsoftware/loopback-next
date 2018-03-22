@@ -4,7 +4,7 @@
 // License text available at https://opensource.org/licenses/MIT
 
 import {Binding} from './binding';
-import {isPromiseLike, getDeepProperty} from './value-promise';
+import {isPromiseLike, getDeepProperty, BoundValue} from './value-promise';
 import {ResolutionOptions, ResolutionSession} from './resolution-session';
 
 import {v1 as uuidv1} from 'uuid';
@@ -12,6 +12,18 @@ import {v1 as uuidv1} from 'uuid';
 import * as debugModule from 'debug';
 import {ValueOrPromise} from '.';
 const debug = debugModule('loopback:context');
+
+// tslint:disable-next-line:no-unused-variable
+export class BindingKey<T> {
+  constructor(public value: string) {}
+  toString() {
+    return this.value;
+  }
+
+  deepProperty<V>(path: string) {
+    return new BindingKey<V>(`${this.value}#${path}`);
+  }
+}
 
 /**
  * Context provides an implementation of Inversion of Control (IoC) container
@@ -43,7 +55,11 @@ export class Context {
    *
    * @param key Binding key
    */
-  bind(key: string): Binding {
+  bind<T = BoundValue>(key: string | BindingKey<T>): Binding<T> {
+    if (typeof key !== 'string') {
+      key = key.value;
+    }
+
     /* istanbul ignore if */
     if (debug.enabled) {
       debug('Adding binding: %s', key);
@@ -222,7 +238,7 @@ export class Context {
    *   (deeply) nested property to retrieve.
    * @returns A promise of the bound value.
    */
-  get<T>(keyWithPath: string): Promise<T>;
+  get<T>(keyWithPath: string | BindingKey<T>): Promise<T>;
 
   /**
    * Get the value bound to the given key, optionally return a (deep) property
@@ -246,20 +262,19 @@ export class Context {
    * the optional binding was not found.
    */
   get<T>(
-    keyWithPath: string,
+    keyWithPath: string | BindingKey<T>,
     optionsOrSession?: ResolutionOptions | ResolutionSession,
   ): Promise<T | undefined>;
 
   // Implementation
   async get<T>(
-    keyWithPath: string,
+    keyWithPath: string | BindingKey<T>,
     optionsOrSession?: ResolutionOptions | ResolutionSession,
   ): Promise<T | undefined> {
     /* istanbul ignore if */
     if (debug.enabled) {
       debug('Resolving binding: %s', keyWithPath);
     }
-
     return await this.getValueOrPromise<T | undefined>(
       keyWithPath,
       optionsOrSession,
@@ -290,7 +305,7 @@ export class Context {
    * `ResolutionSession` is accepted for backward compatibility.
    * @returns A promise of the bound value.
    */
-  getSync<T>(keyWithPath: string): T;
+  getSync<T>(keyWithPath: string | BindingKey<T>): T;
 
   /**
    * Get the synchronous value bound to the given key, optionally
@@ -317,13 +332,13 @@ export class Context {
    * @returns The bound value, or undefined when an optional binding was not found.
    */
   getSync<T>(
-    keyWithPath: string,
+    keyWithPath: string | BindingKey<T>,
     optionsOrSession?: ResolutionOptions | ResolutionSession,
   ): T | undefined;
 
   // Implementation
   getSync<T>(
-    keyWithPath: string,
+    keyWithPath: string | BindingKey<T>,
     optionsOrSession?: ResolutionOptions | ResolutionSession,
   ): T | undefined {
     /* istanbul ignore if */
@@ -407,9 +422,13 @@ export class Context {
    * @internal
    */
   getValueOrPromise<T>(
-    keyWithPath: string,
+    keyWithPath: string | BindingKey<T>,
     optionsOrSession?: ResolutionOptions | ResolutionSession,
   ): ValueOrPromise<T | undefined> {
+    if (typeof keyWithPath !== 'string') {
+      keyWithPath = keyWithPath.value;
+    }
+
     const {key, path} = Binding.parseKeyWithPath(keyWithPath);
 
     // backwards compatibility

@@ -19,7 +19,7 @@ export {
 
 export {Binding, BindingScope, BindingType} from './binding';
 
-export {Context} from './context';
+export {Context, BindingKey} from './context';
 export {ResolutionSession} from './resolution-session';
 export {inject, Setter, Getter, Injection, InjectionMetadata} from './inject';
 export {Provider} from './provider';

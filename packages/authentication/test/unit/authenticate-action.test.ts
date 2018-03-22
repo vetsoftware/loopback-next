@@ -13,6 +13,7 @@ import {
   AuthenticationBindings,
 } from '../..';
 import {MockStrategy} from './fixtures/mock-strategy';
+import {Strategy} from 'passport';
 // FIXME: All of these BDD titles are too verbose and should be reworded
 // to not run afoul of the lint rules!
 // tslint:disable:max-line-length
@@ -69,7 +70,7 @@ describe('AuthenticationProvider', () => {
 
       it('throws an error if the injected passport strategy is not valid', async () => {
         const context: Context = new Context();
-        context.bind(AuthenticationBindings.STRATEGY).to({});
+        context.bind(AuthenticationBindings.STRATEGY).to({} as Strategy);
         context
           .bind(AuthenticationBindings.AUTH_ACTION)
           .toProvider(AuthenticationProvider);

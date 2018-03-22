@@ -4,12 +4,13 @@
 // License text available at https://opensource.org/licenses/MIT
 
 import {CoreBindings} from '@loopback/core';
+import {BindingKey} from '@loopback/context';
 
 export namespace RestBindings {
   // RestServer-specific bindings
-  export const CONFIG = `${CoreBindings.APPLICATION_CONFIG}#rest`;
-  export const HOST = 'rest.host';
-  export const PORT = 'rest.port';
+  export const CONFIG = CoreBindings.APPLICATION_CONFIG.deepProperty('rest');
+  export const HOST = new BindingKey<string | undefined>('rest.host');
+  export const PORT = new BindingKey<number>('rest.port');
   export const HANDLER = 'rest.handler';
 
   export const API_SPEC = 'rest.apiSpec';

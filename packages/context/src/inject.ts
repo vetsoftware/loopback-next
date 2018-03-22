@@ -11,7 +11,7 @@ import {
   MetadataMap,
 } from '@loopback/metadata';
 import {BoundValue, ValueOrPromise, resolveList} from './value-promise';
-import {Context} from './context';
+import {Context, BindingKey} from './context';
 import {ResolutionSession} from './resolution-session';
 
 const PARAMETERS_KEY = 'inject:parameters';
@@ -89,7 +89,7 @@ export interface Injection {
  *
  */
 export function inject(
-  bindingKey: string,
+  bindingKey: string | BindingKey<BoundValue>,
   metadata?: InjectionMetadata,
   resolve?: ResolverFunction,
 ) {
@@ -101,6 +101,10 @@ export function inject(
       | TypedPropertyDescriptor<BoundValue>
       | number,
   ) {
+    if (typeof bindingKey !== 'string') {
+      bindingKey = bindingKey.value;
+    }
+
     if (typeof methodDescriptorOrParameterIndex === 'number') {
       // The decorator is applied to a method parameter
       // Please note propertyKey is `undefined` for constructor
@@ -180,7 +184,7 @@ export namespace inject {
    * @param metadata Optional metadata to help the injection
    */
   export const getter = function injectGetter(
-    bindingKey: string,
+    bindingKey: string | BindingKey<BoundValue>,
     metadata?: InjectionMetadata,
   ) {
     metadata = Object.assign({decorator: '@inject.getter'}, metadata);

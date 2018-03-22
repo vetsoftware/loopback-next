@@ -3,6 +3,8 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 
+import {BindingKey} from '@loopback/context';
+
 /**
  * Namespace for core binding keys
  */
@@ -15,7 +17,9 @@ export namespace CoreBindings {
   /**
    * Binding key for application configuration
    */
-  export const APPLICATION_CONFIG = 'application.config';
+  export const APPLICATION_CONFIG = new BindingKey<object>(
+    'application.config',
+  );
 
   // server
   /**
