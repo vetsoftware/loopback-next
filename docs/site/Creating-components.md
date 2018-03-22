@@ -71,7 +71,7 @@ const app = new Application();
 app.component(MyComponent);
 
 class MyController {
-  constructor(@inject('my-component.my-value') private greeting) {}
+  constructor(@inject('my-component.my-value') private greeting: string) {}
 
   @get('/greet')
   greet() {
@@ -94,7 +94,7 @@ const weatherUrl =
   'http://samples.openweathermap.org/data/2.5/weather?appid=b1b15e88fa797225412429c1c50c122a1'
 
 export class CurrentTemperatureProvider implements Provider<number> {
-  async value(): number {
+  async value() {
     const data = await request(`${weatherUrl}&q=Prague,CZ`, {json:true});
     return data.main.temp;
   }
@@ -109,12 +109,13 @@ In some cases, the Provider may depend on other parts of LoopBack; for example t
 
 ```ts
 import {Provider} from '@loopback/context';
+import {ServerRequest} from 'http';
 const uuid = require('uuid/v4');
 
 class CorrelationIdProvider implements Provider<string>{
-  constructor(@inject('http.request') private request) {}
+  constructor(@inject('rest.http.request') private request: ServerRequest) {}
 
-  value(): string {
+  value() {
     return this.request.headers['X-Correlation-Id'] || uuid();
   }
 }
