@@ -17,7 +17,7 @@ between the HTTP/REST API and domain/database models. Decorations are added to a
 to the corresponding controller's operations. A `Controller` operates only on
 processed input and abstractions of backend services / databases.
 
-This page will only cover `Controller`'s usage with REST APIs.
+This page will only cover a `Controller`'s usage with REST APIs.
 
 ### Review questions
 
@@ -64,11 +64,15 @@ This is a basic API Specification used in the following examples. It is an
 
 ```ts
 const spec = {
-  parameters: [{name: 'name', type: 'string', in: 'query'}],
+  parameters: [{name: 'name', schema: {type: 'string'}, in: 'query'}],
   responses: {
     '200': {
       description: 'greeting text',
-      schema: {type: 'string'},
+      content: {
+        'application/json': {
+          schema: {type: 'string'},
+        },
+      },
     },
   },
 };
@@ -112,22 +116,25 @@ specification.
 ```ts
 // ... in your application constructor
 this.api({
-  openapi: '',
+  openapi: '3.0.0',
   info: {
     title: 'Hello World App',
-    version: '3.0.0',
+    version: '1.0.0',
   },
-  basePath: '/',
   paths: {
     '/greet': {
       get: {
         'x-operation-name': 'greet',
         'x-controller-name': 'MyController',
-        parameters: [{name: 'name', type: 'string', in: 'query'}],
+        parameters: [{name: 'name', schema: {type: 'string'}, in: 'query'}],
         responses: {
           '200': {
             description: 'greeting text',
-            schema: {type: 'string'},
+            content: {
+              'application/json': {
+                schema: {type: 'string'},
+              },
+            },
           },
         },
       },
@@ -142,17 +149,25 @@ specification, so LoopBack can call the `app.api()` function for you.
 
 ```ts
 @api({
-  basePath: '/',
+  openapi: '3.0.0',
+  info: {
+    title: 'Hello World App',
+    version: '1.0.0',
+  },
   paths: {
     '/greet': {
       get: {
         'x-operation-name': 'greet',
         'x-controller-name': 'MyController',
-        parameters: [{name: 'name', type: 'string', in: 'query'}],
+        parameters: [{name: 'name', schema: {type: 'string'}, in: 'query'}],
         responses: {
           '200': {
             description: 'greeting text',
-            schema: {type: 'string'},
+            content: {
+              'application/json': {
+                schema: {type: 'string'},
+              },
+            },
           },
         },
       },
