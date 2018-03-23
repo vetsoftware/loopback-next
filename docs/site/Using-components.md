@@ -11,7 +11,7 @@ summary:
 Components play an important part in the extensibility of LoopBack 4.
 A Component makes it easy for independent developers to contribute additional
 features to LoopBack. Components serve as a vehicle to group extension
-contributions such as Context Bindings and various Artifacts to allow easier
+contributions such as [Context Bindings](Context.md) and various Artifacts to allow easier
 extensibility of your Application.
 
 A typical LoopBack component is an [npm](https://www.npmjs.com) package
@@ -29,8 +29,8 @@ app.component(AuthenticationComponent);
 
 Components can contribute the following items:
 
-- [Controllers](Controllers.html)
-- Providers of additional [Context values](Context.html)
+- [Controllers](Controllers.md)
+- Providers of additional [Context values](Context.md)
 
 LoopBack 4 was built with extensibility in mind and this includes Components,
 which can be allowed to contribute additional artifacts by adding a Mixin
@@ -38,9 +38,9 @@ to your Application class. This doesn't change how a Component is registered
 (`app.component()`) but it enables the Component to contribute additional artifacts.
 For example:
 
-- [Repositories](Repositories.html) can be contributed by a Component by adding
+- [Repositories](Repositories.md) can be contributed by a Component by adding
   `RepositoryMixin` from `@loopback/repository` to your Application
-- [Booters](Booting-an-Application.html#booters) can be contributed by a Component by adding
+- [Booters](Booting-an-Application.md#booters) can be contributed by a Component by adding
   `BootMixin` from `@loopback/boot` to your Application
 
 **Note:** Always check a component's instructions to see if it requires
