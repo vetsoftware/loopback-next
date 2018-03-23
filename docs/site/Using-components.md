@@ -11,15 +11,15 @@ summary:
 Components play an important part in the extensibility of LoopBack 4.
 A Component makes it easy for independent developers to contribute additional
 features to LoopBack. Components serve as a vehicle to group extension
-contributions such as [Context Bindings](Context.md) and various Artifacts to allow easier
+contributions such as [Context Bindings](Context.md) and various artifacts to allow easier
 extensibility of your Application.
 
 A typical LoopBack component is an [npm](https://www.npmjs.com) package
 exporting a Component class which can be added to your application.
 
 ```ts
-import { RestApplication } from "@loopback/rest";
-import { AuthenticationComponent } from "@loopback/authentication";
+import {RestApplication} from '@loopback/rest';
+import {AuthenticationComponent} from '@loopback/authentication';
 
 const app = new RestApplication();
 // Add component to Application, which provides bindings used to resolve
