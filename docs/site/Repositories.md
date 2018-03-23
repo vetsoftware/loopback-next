@@ -256,7 +256,7 @@ application.
 examples may not work out of the box." %}
 
 LoopBack 4 gives you the flexibility to create your own custom Datasources which
-utilize your own custom connector for your favourite back end database. You can
+utilize your own custom connector for your favorite back end database. You can
 then fine tune your CRUD methods to your liking.
 
 ### Example Application
@@ -264,7 +264,7 @@ then fine tune your CRUD methods to your liking.
 You can look at
 [the account-without-juggler application as an example.](https://github.com/strongloop/loopback-next-example/tree/master/services/account-without-juggler)
 
-### Steps to create your own concrete DataSource
+<!--lint enable no-duplicate-headings -->
 
 1.  Implement the `CrudConnector` interface from `@loopback/repository` package.
     [Here is one way to do it](https://github.com/strongloop/loopback-next-example/blob/master/services/account-without-juggler/repositories/account/datasources/mysqlconn.ts)
