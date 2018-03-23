@@ -34,7 +34,7 @@ Components can contribute the following items:
 
 LoopBack 4 was built with extensibility in mind and this includes Components,
 which can be allowed to contribute additional artifacts by adding a Mixin
-to your Application class. This doesn't change how a a Component is registered
+to your Application class. This doesn't change how a Component is registered
 (`app.component()`) but it enables the Component to contribute additional artifacts.
 For example:
 
@@ -43,7 +43,7 @@ For example:
 - [Booters](Booting-an-Application.html#booters) can be contributed by a Component by adding
   `BootMixin` from `@loopback/boot` to your Application
 
-**Note:** Always check a components instructions to see if it requires
+**Note:** Always check a component's instructions to see if it requires
 the use of a Mixin. A Mixin may automatically register a Component, saving you
 the trouble of having to do so manually. Again it's best to check the documentation
 for the given Component / Mixin.
